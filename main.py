@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from tqdm import tqdm
+import os
 
 curve_dict = {
     1: ["Auto"],
@@ -74,6 +75,20 @@ def massive_changes(
     for tag in list_tags:
         clear_and_fill(network_tag_origin, network_tag_destiny, tag)
 
+    #############
+    # model2D3D #
+    #############
+
+    for model2D3DSegment in network_tag_destiny.findall("./models2D3D/model2D3D/model2D3DSegment"):
+        file3D = model2D3DSegment.get("file3D")
+        text = "#data#..\\..\\..\\..\\"
+        if file3D.startswith(text):
+            model2D3DSegment.attrib["file3D"] = "#data#..\\..\\..\\..\\..\\" + file3D[len(text):]
 
     ET.indent(tree2)
     tree2.write(destiny_path, encoding="utf-8", xml_declaration=True)
+
+def start_changes(
+        project_path, #Path of the project
+        ) -> None:
+    pass
