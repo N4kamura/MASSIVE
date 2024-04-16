@@ -8,130 +8,72 @@ curve_dict = {
     4: ["Moto lineal","Scooter","Bike Man", "Bike Woman"],
 }
 
-path = r".\tools\original.inpx"
-destiny_path = r"C:\Users\dacan\OneDrive\Desktop\PRUEBAS\Maxima Entropia\1 PROYECTO SURCO\6. Sub Area Vissim\Sub Area 016\PTV Vissim Sub Area 016 (SA).inpx"
+def clear_and_fill(
+        tag_origin,     #XML tree of the .inpx template
+        tag_destiny,    #XML tree of the .inpx file to be modified
+        tag,            #Tag to be modified
+        ) -> None:
+    data_new = tag_origin.find(f"./{tag}")
+    data = tag_destiny.find(f"./{tag}")
+    data.clear()
+    for item in data_new:
+        data.append(item)
 
-#####################
-# Opening XML files #
-#####################
+def massive_changes(
+        destiny_path: str, # Path of the .inpx file to be modified
+        ) -> None:
 
-tree = ET.parse(path)
-network_tag_origin = tree.getroot()
+    #####################
+    # Opening XML files #
+    #####################
 
-tree2 = ET.parse(destiny_path)
-network_tag_destiny = tree2.getroot()
+    tree = ET.parse(r".\tools\original.inpx")
+    network_tag_origin = tree.getroot()
 
-##################
-# curvSpeedFuncs #
-##################
+    tree2 = ET.parse(destiny_path)
+    network_tag_destiny = tree2.getroot()
 
-curvSpeedFuncs = network_tag_origin.find("./curvSpeedFuncs")
+    ##################
+    # curvSpeedFuncs #
+    ##################
 
-curvSpeedFuncs_old = network_tag_destiny.find("./curvSpeedFuncs")
-if curvSpeedFuncs_old:
-    curvSpeedFuncs_old.clear()
+    curvSpeedFuncs = network_tag_origin.find("./curvSpeedFuncs")
 
-    for curveSpeedFunc in curvSpeedFuncs:
-        curvSpeedFuncs_old.append(curveSpeedFunc)
+    curvSpeedFuncs_old = network_tag_destiny.find("./curvSpeedFuncs")
+    if curvSpeedFuncs_old:
+        curvSpeedFuncs_old.clear()
 
-else:
-    curvSpeedFuncs_old = ET.SubElement(network_tag_destiny, "curvSpeedFuncs")
-    for curveSpeedFunc in curvSpeedFuncs:
-        curvSpeedFuncs_old.append(curveSpeedFunc)
+        for curveSpeedFunc in curvSpeedFuncs:
+            curvSpeedFuncs_old.append(curveSpeedFunc)
 
-##################################
-# curvSpeedFuncs -> vehicleTypes #
-##################################
+    else:
+        curvSpeedFuncs_old = ET.SubElement(network_tag_destiny, "curvSpeedFuncs")
+        for curveSpeedFunc in curvSpeedFuncs:
+            curvSpeedFuncs_old.append(curveSpeedFunc)
 
-for vehicleType in network_tag_destiny.findall("./vehicleTypes/vehicleType"):
-    name = vehicleType.attrib["name"]
-    for key, value in curve_dict.items():
-        if name in value:
-            vehicleType.set("desCurveSpeedFunc", str(key))
-            break
+    ##################################
+    # curvSpeedFuncs -> vehicleTypes #
+    ##################################
 
-    attributes = vehicleType.attrib
-    sorted_keys = sorted(attributes.keys())
-    sorted_attributes = {key_name: attributes[key_name] for key_name in sorted_keys}
-    vehicleType.attrib.clear()
-    vehicleType.attrib.update(sorted_attributes)
+    for vehicleType in network_tag_destiny.findall("./vehicleTypes/vehicleType"):
+        name = vehicleType.attrib["name"]
+        for key, value in curve_dict.items():
+            if name in value:
+                vehicleType.set("desCurveSpeedFunc", str(key))
+                break
 
-##################
-# vehicleClasses #
-##################
+        attributes = vehicleType.attrib
+        sorted_keys = sorted(attributes.keys())
+        sorted_attributes = {key_name: attributes[key_name] for key_name in sorted_keys}
+        vehicleType.attrib.clear()
+        vehicleType.attrib.update(sorted_attributes)
 
-vehicleClasses_new = network_tag_origin.find("./vehicleClasses")
+    list_tags = ["vehicleClasses", "drivingBehaviors", "linkBehaviorTypes",
+                 "vehicleCompositions", "pedestrianTypes", "pedestrianClasses",
+                 "pedestrianCompositions"]
+    for tag in list_tags:
+        clear_and_fill(network_tag_origin, network_tag_destiny, tag)
 
-vehicleClasses = network_tag_destiny.find("./vehicleClasses")
-vehicleClasses.clear()
-for vehicleClass in vehicleClasses_new:
-    vehicleClasses.append(vehicleClass)
 
-####################
-# drivingBehaviors #
-####################
-
-drivingBehaviors_new = network_tag_origin.find("./drivingBehaviors") #Original
-
-drivingBehaviors = network_tag_destiny.find("./drivingBehaviors") #network_tag_destiny -> Destiny
-drivingBehaviors.clear()
-for drivingBehavior in drivingBehaviors_new:
-    drivingBehaviors.append(drivingBehavior)
-
-#########################################
-# drivingBehaviors -> linkBehaviorTypes #
-#########################################
-
-linkBehaviorTypes_new = network_tag_origin.find("./linkBehaviorTypes")
-
-linkBehaviorTypes = network_tag_destiny.find("./linkBehaviorTypes")
-linkBehaviorTypes.clear()
-for linkBehaviorType in linkBehaviorTypes_new:
-    linkBehaviorTypes.append(linkBehaviorType)
-
-#######################
-# vehicleCompositions #
-#######################
-
-vehicleCompositions_new = network_tag_origin.find("./vehicleCompositions")
-
-vehicleCompositions = network_tag_destiny.find("./vehicleCompositions")
-vehicleCompositions.clear()
-for vehicleComposition in vehicleCompositions_new:
-    vehicleCompositions.append(vehicleComposition)
-
-###################
-# pedestrianTypes #
-###################
-
-pedestrianTypes_new = network_tag_origin.find("./pedestrianTypes")
-
-pedestrianTypes = network_tag_destiny.find("./pedestrianTypes")
-pedestrianTypes.clear()
-for pedestrianType in pedestrianTypes_new:
-    pedestrianTypes.append(pedestrianType)
-
-#####################
-# pedestrianClasses #
-#####################
-
-pedestrianClasses_new = network_tag_origin.find("./pedestrianClasses")
-
-pedestrianClasses = network_tag_destiny.find("./pedestrianClasses")
-pedestrianClasses.clear()
-for pedestrianClass in pedestrianClasses_new:
-    pedestrianClasses.append(pedestrianClass)
-
-##########################
-# pedestrianCompositions #
-##########################
-
-pedestrianCompositions_new = network_tag_origin.find("./pedestrianCompositions")
-
-pedestrianCompositions = network_tag_destiny.find("./pedestrianCompositions")
-pedestrianCompositions.clear()
-for pedestrianComposition in pedestrianCompositions_new:
-    pedestrianCompositions.append(pedestrianComposition)
-
-ET.indent(tree2)
-tree2.write(destiny_path)
+    ET.indent(tree2)
+    tree2.write(destiny_path, encoding="utf-8", xml_declaration=True)
